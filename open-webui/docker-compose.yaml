@@ -1,0 +1,56 @@
+services:
+  open-webui-db:
+    image: postgres:16-alpine
+
+    container_name: open_webui_db
+
+    restart: always
+
+    environment:
+      - POSTGRES_USER=ow_admin
+
+      - POSTGRES_PASSWORD=****
+
+      - POSTGRES_DB=openwebui_db
+
+    volumes:
+      - /volume1/docker/open-webui/postgres_data:/var/lib/postgresql/data
+
+  open-webui:
+    image: ghcr.io/open-webui/open-webui:main
+
+    container_name: open_webui
+
+    restart: always
+
+    depends_on:
+      - open-webui-db
+
+    ports:
+      - "15014:8080"
+
+    environment:
+      - DATABASE_URL=postgresql://ow_admin:*****@open-webui-db:5432/openwebui_db
+
+      - OLLAMA_BASE_URL=http://<IP de del NAS>:15434
+
+      - WEBUI_SECRET_KEY=****
+
+      - ENABLE_SIGNUP=False
+
+    volumes:
+      - /volume1/docker/open-webui/app_data:/app/backend/data
+
+      - /volume2/docker_data/open-webui/uploads:/app/backend/data/uploads
+
+    networks:
+      - default
+
+      - internet
+
+networks:
+  default:
+    driver: bridge
+
+  internet:
+    external: true
